@@ -4,3 +4,5 @@ main.py
 build
 *.egg-info
 dist
+.claude
+scripts/
