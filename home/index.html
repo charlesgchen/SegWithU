@@ -354,6 +354,55 @@
     line-height: 1.7;
   }
 
+  /* ARCHITECTURE EXPLORER */
+  .arch-map {
+    position: relative;
+    margin: 8px 0 20px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--card);
+  }
+  .arch-map img { width: 100%; display: block; }
+  .arch-map .hotspot {
+    position: absolute;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .arch-map .hotspot:hover,
+  .arch-map .hotspot:focus-visible {
+    background: rgba(194, 65, 12, 0.18);
+    border-color: var(--accent);
+    outline: none;
+  }
+  .arch-viewer {
+    margin-top: 18px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .arch-viewer-label {
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: var(--card-2);
+    border-bottom: 1px solid var(--rule);
+  }
+  .arch-viewer iframe {
+    width: 100%;
+    height: 540px;
+    border: 0;
+    display: block;
+    background: #fff;
+  }
+  .arch-viewer.empty iframe { display: none; }
+
   /* Anchor offsets for nav scroll */
   .anchor { scroll-margin-top: 24px; }
 </style>
@@ -423,75 +472,24 @@
   </div>
 </section>
 
-<!-- ===================== INTERACTIVE VIEWER ===================== -->
-<section class="anchor" id="logits">
+<!-- ===================== ARCHITECTURE EXPLORER ===================== -->
+<section class="anchor" id="explorer">
   <div class="wrap">
-    <h2>Interactive Viewer</h2>
-    <p class="lede">Per-class logit volumes produced by the frozen segmentation backbone, rendered as fully interactive Plotly volumes. Click and drag to orbit, scroll to zoom, and hover to read raw logit values.</p>
-    <div class="logits-grid">
-      <div class="logit-card">
-        <div class="label"><span>Class 0 — <span class="cls">Background</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_0.html" loading="lazy" title="Class 0 logits"></iframe>
-      </div>
-      <div class="logit-card">
-        <div class="label"><span>Class 1 — <span class="cls">Foreground</span></span><span>logit volume</span></div>
-        <iframe src="assets/logits_1.html" loading="lazy" title="Class 1 logits"></iframe>
-      </div>
-    </div>
-  </div>
-</section>
+    <h2>Architecture Explorer</h2>
+    <p class="lede">Click a node in the architecture diagram to load its interactive 3D view below. Only one viewer is active at a time, so the page stays responsive.</p>
 
-<!-- ===================== PIPELINE GALLERY ===================== -->
-<section class="anchor" id="gallery">
-  <div class="wrap">
-    <div class="pipeline-head">
-      <div>
-        <h2>Pipeline</h2>
-        <p class="lede">A walk through the five stages of SegWithU on a single case — from input volume through tapped features, probe responses, logits, and the resulting entropy map. Use the arrows to flip between two examples.</p>
-      </div>
-      <div class="pager" role="group" aria-label="Example pager">
-        <button class="pager-btn" id="prevEx" aria-label="Previous example">◀</button>
-        <span class="pager-label" id="exLabel">Example 1 of 2</span>
-        <button class="pager-btn" id="nextEx" aria-label="Next example">▶</button>
-      </div>
+    <div class="arch-map">
+      <img src="assets/swu-arch.png" alt="SegWithU architecture diagram" />
+      <a class="hotspot" href="#" data-viewer="assets/input.png.html"  data-name="Input Volume" aria-label="Input Volume"
+         style="left:1%; top:0%; width:19%; height:17%"></a>
+      <a class="hotspot" href="#" data-viewer="assets/entropy_map.html" data-name="Entropy Map"  aria-label="Entropy Map"
+         style="left:84%; top:22%; width:15%; height:15%"></a>
     </div>
 
-    <div class="pipeline-stages" id="pipelineStages">
-      <div class="stage-card">
-        <div class="stage-step">01</div>
-        <div class="stage-name">Input Volume</div>
-        <div class="stage-frame"><iframe src="assets/input.png.html" loading="lazy" title="Input volume"></iframe></div>
-        <div class="stage-caption">Raw 3D input fed to the frozen backbone.</div>
-      </div>
-
-      <div class="stage-card">
-        <div class="stage-step">02</div>
-        <div class="stage-name">Feature Map</div>
-        <div class="stage-frame"><iframe id="frFeature" src="assets/feature_map_0_0.html" loading="lazy" title="Feature map"></iframe></div>
-        <div class="stage-caption">Tapped multi-scale feature representation.</div>
-      </div>
-
-      <div class="stage-card">
-        <div class="stage-step">03</div>
-        <div class="stage-name">Probe Response</div>
-        <div class="stage-frame"><iframe id="frProbe" src="assets/probe_response_0.html" loading="lazy" title="Probe response"></iframe></div>
-        <div class="stage-caption">Rank-1 posterior probe activations <i>v = ψ(h)</i>.</div>
-      </div>
-
-      <!-- <div class="stage-card">
-        <div class="stage-step">04</div>
-        <div class="stage-name">Logits</div>
-        <div class="stage-frame"><iframe id="frLogit" src="assets/logits_0.html" loading="lazy" title="Logits"></iframe></div>
-        <div class="stage-caption">Per-class backbone logits before softmax.</div>
-      </div> -->
-
-      <!-- <div class="stage-card">
-        <div class="stage-step">05</div> -->
-        <!-- <div class="stage-name">Entropy</div>
-        <div class="stage-frame"><iframe src="assets/entropy_map.html" loading="lazy" title="Entropy map"></iframe></div> -->
-        <!-- <div class="stage-caption">Shannon entropy <i>H(p) = −Σ p<sub>c</sub> log p<sub>c</sub></i>.</div> -->
-      <!-- </div>
-    <!-- </div> --> -->
+    <div class="arch-viewer empty" id="archViewerWrap">
+      <div class="arch-viewer-label" id="archViewerLabel">Select a node above to load its interactive view.</div>
+      <iframe id="archViewer" src="about:blank" title="Interactive viewer"></iframe>
+    </div>
   </div>
 </section>
 
@@ -511,45 +509,43 @@
 </section>
 
 <script>
-/* Pipeline pager — toggles iframes between example 0 and example 1 */
+/* Architecture Explorer — cache an iframe per chart and toggle visibility */
 (function() {
-  const examples = [
-    {
-      feature: 'assets/feature_map_0_0.html',
-      probe:   'assets/probe_response_0.html',
-      logit:   'assets/logits_0.html',
-    },
-    {
-      feature: 'assets/feature_map_0_1.html',
-      probe:   'assets/probe_response_1.html',
-      logit:   'assets/logits_1.html',
-    },
-  ];
-  let idx = 0;
-  const fr = {
-    feature: document.getElementById('frFeature'),
-    probe:   document.getElementById('frProbe'),
-    logit:   document.getElementById('frLogit'),
-  };
-  const lbl = document.getElementById('exLabel');
-  const stages = document.getElementById('pipelineStages');
+  const initial = document.getElementById('archViewer');
+  const wrap    = document.getElementById('archViewerWrap');
+  const label   = document.getElementById('archViewerLabel');
+  if (!wrap) return;
 
-  function go(newIdx) {
-    if (newIdx === idx) return;
-    idx = (newIdx + examples.length) % examples.length;
-    const e = examples[idx];
-    // brief fade for feel
-    stages.classList.add('switching');
-    setTimeout(() => {
-      fr.feature.src = e.feature;
-      fr.probe.src   = e.probe;
-      fr.logit.src   = e.logit;
-      lbl.textContent = `Example ${idx + 1} of ${examples.length}`;
-      stages.classList.remove('switching');
-    }, 160);
-  }
-  document.getElementById('prevEx').addEventListener('click', () => go(idx - 1));
-  document.getElementById('nextEx').addEventListener('click', () => go(idx + 1));
+  // Drop the placeholder iframe; we manage frames per-target.
+  if (initial) initial.remove();
+
+  const cache  = new Map();
+  let active   = null;
+
+  document.querySelectorAll('.arch-map .hotspot').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = a.dataset.viewer;
+      const name   = a.dataset.name || 'Interactive view';
+
+      if (active) active.style.display = 'none';
+
+      let frame = cache.get(target);
+      if (!frame) {
+        frame = document.createElement('iframe');
+        frame.title = name;
+        frame.src = target;
+        wrap.appendChild(frame);
+        cache.set(target, frame);
+      }
+      frame.style.display = 'block';
+      active = frame;
+
+      label.textContent = name;
+      wrap.classList.remove('empty');
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
 })();
 </script>
 
