@@ -364,18 +364,63 @@
     background: var(--card);
   }
   .arch-map img { width: 100%; display: block; }
-  .arch-map .hotspot {
+  .arch-map .hot {
     position: absolute;
     cursor: pointer;
+    background: transparent;
     border: 2px solid transparent;
     border-radius: 6px;
+    padding: 0;
+    font: inherit;
     transition: background .15s ease, border-color .15s ease;
   }
-  .arch-map .hotspot:hover,
-  .arch-map .hotspot:focus-visible {
+  .arch-map .hot:hover,
+  .arch-map .hot:focus-visible {
     background: rgba(194, 65, 12, 0.18);
     border-color: var(--accent);
     outline: none;
+  }
+  .arch-map .hot::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+  }
+  .arch-map .hot.below::after {
+    bottom: auto;
+    top: calc(100% + 6px);
+  }
+  .arch-map .hot:hover::after,
+  .arch-map .hot:focus-visible::after { opacity: 1; }
+  .arch-map .hot[data-unavailable] {
+    cursor: not-allowed;
+  }
+  .arch-map .hot[data-unavailable]:hover {
+    background: rgba(138, 138, 138, 0.18);
+    border-color: var(--muted);
+  }
+  .arch-map .hot[data-unavailable]::after {
+    content: attr(data-label) " — coming soon";
+    background: var(--muted);
+  }
+  .arch-viewer-tag {
+    margin-left: 10px;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
   }
   .arch-viewer {
     margin-top: 18px;
@@ -463,9 +508,9 @@
     <h2>Method</h2>
     <p class="lede">SegWithU treats the segmentation backbone as a fixed predictor and learns a small uncertainty head on tapped intermediate features. Uncertainty is parameterised as <b>perturbation energy</b>: rank-1 probes induce latent perturbations whose effect on output logits is the basis for the epistemic signal.</p>
 
-    <div class="method-figure">
+    <!-- <div class="method-figure">
       <img src="method_figure.png" alt="Method figure showing frozen backbone, multi-scale feature taps, fusion, delta-logits, epistemic and aleatoric outputs, and downstream calibration / anchor / ranking maps." />
-    </div>
+    </div> -->
     <p class="method-caption">
       <b>Overview of SegWithU.</b> A <i>frozen</i> segmentation backbone produces logits and a probability map. Multi-scale intermediate features are tapped (purple) and fused into a probe response that yields a <b>probe map</b>. Rank-1 posterior probes induce class-logit perturbations (the <b>residual map</b>), whose variance gives the <b>epistemic</b> map. In parallel, an <b>aleatoric</b> branch reads the fused features. Auxiliary signals — entropy, margin, ambiguity weight — combine with these via lightweight 1×1 convolutions to produce two functionally distinct outputs: a <b>calibration</b> map that tempers logits via <i>z̃ = z / √(1+U<sub>cal</sub>)</i>, and an <b>anchor → ranking</b> map optimized for error ordering and selective prediction. Only the orange modules are learnable; the backbone is never modified.
     </p>
@@ -480,10 +525,84 @@
 
     <div class="arch-map">
       <img src="assets/swu-arch.png" alt="SegWithU architecture diagram" />
-      <a class="hotspot" href="#" data-viewer="assets/input.png.html"  data-name="Input Volume" aria-label="Input Volume"
-         style="left:1%; top:0%; width:19%; height:17%"></a>
-      <a class="hotspot" href="#" data-viewer="assets/entropy_map.html" data-name="Entropy Map"  aria-label="Entropy Map"
-         style="left:84%; top:22%; width:15%; height:15%"></a>
+
+      <!-- Top row -->
+      <button class="hot below" style="left:4%; top:4.5%; width:12.5%; height:17%;"
+              data-src="assets/input.png.html" data-title="Input Volume" data-tag="case 8 · stage 01"
+              data-label="Input Volume"></button>
+
+      <button class="hot below" style="left:65%; top:3.5%; width:18%; height:18%;"
+              data-src="assets/logits_0.html" data-title="Logits — Class 0" data-tag="background"
+              data-label="Logits"></button>
+
+      <button class="hot below" style="left:86%; top:4%; width:12.5%; height:17%;"
+              data-src="assets/label.png.html" data-title="Probabilities (Predicted Segmentation)" data-tag="argmax(softmax(z))"
+              data-label="Probabilities"></button>
+
+      <!-- Multi-scale feature maps stack (left side) -->
+      <button class="hot" style="left:1.5%; top:29%; width:18%; height:42%;"
+              data-src="assets/feature_map_0_0.html" data-title="Multi-scale Feature Maps" data-tag="tapped backbone features"
+              data-label="Feature Maps"></button>
+
+      <!-- Probe Response -->
+      <button class="hot" style="left:33%; top:23%; width:16%; height:21%;"
+              data-src="assets/probe_response_0.html" data-title="Probe Map" data-tag="ψ(h)"
+              data-label="Probe Map"></button>
+
+      <!-- Probe Map -->
+      <button class="hot" style="left:52%; top:23%; width:12%; height:17%;"
+              data-src="assets/probe_response_0.html" data-title="Probe Map" data-tag="ψ(h)"
+              data-label="Probe Map"></button>
+
+      <!-- Entropy Map (right) -->
+      <button class="hot" style="left:86%; top:29%; width:12.5%; height:17%;"
+              data-src="assets/entropy_map.html" data-title="Entropy Map" data-tag="H(p) = −Σ p_c log p_c"
+              data-label="Entropy"></button>
+
+      <!-- Residual Map (center) -->
+      <button class="hot below" data-unavailable
+              style="left:52%; top:42%; width:12%; height:17%;"
+              data-src="assets/residual_case8.html" data-title="Residual Map" data-tag="δz from probes"
+              data-label="Residual"></button>
+
+      <!-- Margin Map -->
+      <button class="hot below" data-unavailable
+              style="left:68.5%; top:58.5%; width:12.5%; height:17%;"
+              data-src="assets/margin_case8.html" data-title="Margin Map" data-tag="z₍₁₎ − z₍₂₎"
+              data-label="Margin"></button>
+
+      <!-- Weight Map -->
+      <button class="hot below" data-unavailable
+              style="left:86%; top:58.5%; width:12.5%; height:17%;"
+              data-src="assets/weight_case8.html" data-title="Weight Map" data-tag="ambiguity weight"
+              data-label="Weight"></button>
+
+      <!-- Epistemic -->
+      <button class="hot below" data-unavailable
+              style="left:35%; top:59%; width:12.5%; height:16%;"
+              data-src="assets/epistemic_case8.html" data-title="Epistemic Uncertainty" data-tag="Var(δz)"
+              data-label="Epistemic"></button>
+
+      <!-- Bottom row: Aleatoric, Calibration, Anchor, Ranking -->
+      <button class="hot below" data-unavailable
+              style="left:41%; top:81%; width:12%; height:17%;"
+              data-src="assets/aleatoric_case8.html" data-title="Aleatoric Uncertainty" data-tag="data-intrinsic noise"
+              data-label="Aleatoric"></button>
+
+      <button class="hot below" data-unavailable
+              style="left:55%; top:81%; width:12%; height:17%;"
+              data-src="assets/calibration_case8.html" data-title="Calibration Map" data-tag="z̃ = z / √(1+U_cal)"
+              data-label="Calibration"></button>
+
+      <button class="hot below" data-unavailable
+              style="left:68.5%; top:81%; width:12.5%; height:17%;"
+              data-src="assets/anchor_case8.html" data-title="Anchor Map" data-tag="error-anchor signal"
+              data-label="Anchor"></button>
+
+      <button class="hot below" data-unavailable
+              style="left:86%; top:81%; width:12.5%; height:17%;"
+              data-src="assets/ranking_case8.html" data-title="Ranking Map" data-tag="error ordering / selective prediction"
+              data-label="Ranking"></button>
     </div>
 
     <div class="arch-viewer empty" id="archViewerWrap">
@@ -522,26 +641,36 @@
   const cache  = new Map();
   let active   = null;
 
-  document.querySelectorAll('.arch-map .hotspot').forEach(a => {
-    a.addEventListener('click', e => {
+  document.querySelectorAll('.arch-map .hot').forEach(btn => {
+    btn.addEventListener('click', e => {
       e.preventDefault();
-      const target = a.dataset.viewer;
-      const name   = a.dataset.name || 'Interactive view';
 
+      const title = btn.dataset.title || 'Interactive view';
+      const tag   = btn.dataset.tag || '';
+
+      if (btn.hasAttribute('data-unavailable')) {
+        if (active) { active.style.display = 'none'; active = null; }
+        label.innerHTML = `${title} <span class="arch-viewer-tag">— interactive view coming soon</span>`;
+        wrap.classList.add('empty');
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      const target = btn.dataset.src;
       if (active) active.style.display = 'none';
 
       let frame = cache.get(target);
       if (!frame) {
         frame = document.createElement('iframe');
-        frame.title = name;
-        frame.src = target;
+        frame.title = title;
+        frame.src   = target;
         wrap.appendChild(frame);
         cache.set(target, frame);
       }
       frame.style.display = 'block';
       active = frame;
 
-      label.textContent = name;
+      label.innerHTML = title + (tag ? ` <span class="arch-viewer-tag">${tag}</span>` : '');
       wrap.classList.remove('empty');
       wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
